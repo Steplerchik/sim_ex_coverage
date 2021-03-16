@@ -1,0 +1,4 @@
+base_frame: ump
+map_frame: map
+lethal_cost_threshold: 60
+robot_size: 0.5

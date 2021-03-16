@@ -1,0 +1,7 @@
+map_topic: "/some_map_topic"
+first_map_only: false
+track_unknown_space: true
+subscribe_to_updates: true
+trinary_costmap: true
+lethal_cost_threshold: 60
+resolution: 0.5

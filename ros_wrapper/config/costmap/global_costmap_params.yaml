@@ -1,0 +1,15 @@
+costmap:
+  plugins:
+    - {name: static_layer,       type: "costmap_2d::StaticLayer"}
+    - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
+  global_frame: "map"
+  robot_base_frame: "map"
+  update_frequency: 1.0
+  publish_frequency: 1.0
+  always_send_full_costmap: true
+  static_map: true
+  rolling_window: false
+
+#  inflation_radius: 0.25 # robot_size / 2
+  inflation_radius: 0.1 # robot_size / 2
+  cost_scaling_factor: 0.0 # to make it equal for all extension

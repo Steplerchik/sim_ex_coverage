@@ -7,8 +7,8 @@ from std_msgs.msg import Bool
 from nav_msgs.msg import Path, OccupancyGrid
 from geometry_msgs.msg import PointStamped, PoseStamped
 from visualization_msgs.msg import Marker
-from structures import MapData, STMap
-from sim_ex_coverage_planner import SimExCoveragePlanner
+from libs.structures import MapData, STMap
+from libs.sim_ex_coverage_planner import SimExCoveragePlanner
 from ros_conversions import cvt_ros_pose2point, get_transform, cvt_map2occupancy, cvt_occupancy2map
 from ros_functions import publish_map, publish_marker, publish_path
 import threading

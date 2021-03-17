@@ -1,5 +1,5 @@
 import rospy
-from structures import MapData
+from libs.structures import MapData
 from ros_conversions import cvt_map2occupancy, cvt_points2marker, cvt_points2path
 import numpy as np
 

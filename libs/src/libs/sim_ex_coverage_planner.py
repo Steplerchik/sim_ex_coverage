@@ -1,8 +1,8 @@
 import numpy as np
-from structures import MapData, STCell, STMap
-from graph import Graph
-from conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle
-from conversions import FREE, UNKNOWN
+from libs.structures import MapData, STCell, STMap
+from libs.graph import Graph
+from libs.conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle
+from libs.conversions import FREE, UNKNOWN
 
 
 class SimExCoveragePlanner(object):

@@ -5,9 +5,8 @@ import tf_conversions
 import tf2_ros
 import numpy as np
 import rospy
-from structures import MapData
-from conversions import FREE, OCCUPIED, UNKNOWN, UNKNOWN_UPPER
-
+from libs.structures import MapData
+from libs.conversions import FREE, OCCUPIED, UNKNOWN, UNKNOWN_UPPER
 
 def cvt_angle2quaternion(angle: np.array) -> Quaternion:
     quaternion = Quaternion()

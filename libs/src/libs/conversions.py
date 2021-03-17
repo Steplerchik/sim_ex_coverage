@@ -1,5 +1,5 @@
 import numpy as np
-from structures import MapData
+from libs.structures import MapData
 import cv2
 from math import ceil, atan2
 

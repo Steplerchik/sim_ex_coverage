@@ -3,7 +3,8 @@
     <arg name="robot_size"           default="0.5"/>
     <arg name="extend_map"           default="true"/>
     <arg name="map_topic"            default="/cartographer/map"/>
-    <arg name="rviz"                 default="true"/>
+    <arg name="rviz"                 default="false"/>
+    <param name ="/use_sim_time" value="false"/>
     <!-- =============================================================================== -->
     <node if="$(eval simulate_tf == true)" pkg="ros_wrapper" type="tf_sim_node.py" name="tf_sim_node" output="screen" respawn="true">
         <rosparam command="load" file="$(find ros_wrapper)/config/tf_sim_node.yaml" />
@@ -11,7 +12,7 @@
 
     <group if="$(eval extend_map == true)">
         <!--Launch C-space creation by costmap_2d ROS navigation package-->
-        <node pkg="costmap_2d" type="costmap_2d_node" name="costmap_2d_node" output="screen">
+        <node pkg="costmap_2d" type="costmap_2d_node" name="costmap_2d_node" output="log">
             <rosparam file="$(find ros_wrapper)/config/costmap/global_costmap_params.yaml" command="load"/>
             <rosparam file="$(find ros_wrapper)/config/costmap/static_map_params.yaml" command="load" ns="costmap/static_layer"/>
             <rosparam file="$(find ros_wrapper)/config/costmap/inflation_map_params.yaml" command="load" ns="costmap/inflation_layer"/>

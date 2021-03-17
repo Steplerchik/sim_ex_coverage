@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+    sim_ex_coverage:
+        build: .
+        network_mode: host
+        container_name: sim_ex_coverage
+        working_dir: /root
+        volumes:
+            - type: bind
+              source: ./ros_wrapper/config
+              target: /root/config
+            - type: bind
+              source: ./ros_wrapper/launch
+              target: /root/launch
+        command: bash -c "roslaunch --wait ./launch/sim_ex_coverage_node.launch"
+

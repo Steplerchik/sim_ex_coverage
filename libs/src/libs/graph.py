@@ -1,6 +1,6 @@
 import numpy as np
-from structures import MapData
-from conversions import cvt_map_point2point
+from libs.structures import MapData
+from libs.conversions import cvt_map_point2point
 
 class Graph(object):
     def __init__(self):

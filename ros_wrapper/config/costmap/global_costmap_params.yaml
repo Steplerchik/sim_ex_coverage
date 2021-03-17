@@ -3,7 +3,7 @@ costmap:
     - {name: static_layer,       type: "costmap_2d::StaticLayer"}
     - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
   global_frame: "map"
-  robot_base_frame: "map"
+  robot_base_frame: "ump"
   update_frequency: 1.0
   publish_frequency: 1.0
   always_send_full_costmap: true

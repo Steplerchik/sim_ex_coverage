@@ -1,5 +1,5 @@
 <launch>
-    <arg name="simulate_tf"          default="true"/>
+    <arg name="simulate_tf"          default="false"/>
     <arg name="robot_size"           default="0.5"/>
     <arg name="extend_map"           default="true"/>
     <arg name="map_topic"            default="/cartographer/map"/>
@@ -10,27 +10,23 @@
         <rosparam command="load" file="$(find ros_wrapper)/config/tf_sim_node.yaml" />
     </node>
 
-    <group if="$(eval extend_map == true)">
-        <!--Launch C-space creation by costmap_2d ROS navigation package-->
-        <node pkg="costmap_2d" type="costmap_2d_node" name="costmap_2d_node" output="log">
-            <rosparam file="$(find ros_wrapper)/config/costmap/global_costmap_params.yaml" command="load"/>
-            <rosparam file="$(find ros_wrapper)/config/costmap/static_map_params.yaml" command="load" ns="costmap/static_layer"/>
-            <rosparam file="$(find ros_wrapper)/config/costmap/inflation_map_params.yaml" command="load" ns="costmap/inflation_layer"/>
-            <param name="costmap/static_layer/map_topic" value="$(arg map_topic)"/>
-            <param name="costmap/inflation_radius" value="$(eval 0.5 * arg('robot_size'))"/>
-            <remap from="/costmap_2d_node/costmap/costmap" to="/extended_map"/>
-        </node>
-
-        <node pkg="ros_wrapper" type="sim_ex_coverage_node.py" name="sim_ex_coverage_node" output="screen" respawn="true">
-            <rosparam command="load" file="$(find ros_wrapper)/config/sim_ex_coverage_node.yaml" />
-            <remap from="map" to="/extended_map"/>
-        </node>
-    </group>
-
-    <node if="$(eval extend_map == false)" pkg="ros_wrapper" type="sim_ex_coverage_node.py" name="sim_ex_coverage_node" output="screen" respawn="true">
-        <rosparam command="load" file="$(find ros_wrapper)/config/sim_ex_coverage_node.yaml" />
-        <remap from="map" to="$(arg map_topic)"/>
+    <!--Launch extended pace creation by costmap_2d ROS navigation package-->
+    <node if="$(eval extend_map == true)" pkg="costmap_2d" type="costmap_2d_node" name="costmap_2d_node" output="log">
+        <rosparam file="$(find ros_wrapper)/config/costmap/global_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find ros_wrapper)/config/costmap/static_map_params.yaml" command="load" ns="costmap/static_layer"/>
+        <rosparam file="$(find ros_wrapper)/config/costmap/inflation_map_params.yaml" command="load" ns="costmap/inflation_layer"/>
+        <param name="costmap/static_layer/map_topic" value="$(arg map_topic)"/>
+        <param name="costmap/inflation_radius" value="$(eval 0.5 * arg('robot_size'))"/>
+        <remap from="/costmap_2d_node/costmap/costmap" to="/extended_map"/>
     </node>
 
-     <node if="$(eval rviz == true)" type="rviz" name="rviz" pkg="rviz" args="-d $(find ros_wrapper)/config/sim_ex_coverage.rviz" />
+    <node pkg="ros_wrapper" type="sim_ex_coverage_node.py" name="sim_ex_coverage_node" output="screen" respawn="true">
+        <rosparam command="load" file="$(find ros_wrapper)/config/sim_ex_coverage_node.yaml" />
+        <param name="robot_size" value="$(arg robot_size)"/>
+        <remap from="map" to="$(arg map_topic)" if="$(eval extend_map == false)"/>
+        <remap from="map" to="/extended_map" if="$(eval extend_map == true)"/>
+        <remap from="/start_exploration" to="/trajectory_finished"/>
+    </node>
+
+    <node if="$(eval rviz == true)" type="rviz" name="rviz" pkg="rviz" args="-d $(find ros_wrapper)/config/sim_ex_coverage.rviz" />
 </launch>

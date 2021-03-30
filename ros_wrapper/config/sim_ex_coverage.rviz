@@ -77,12 +77,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: false
+      Enabled: true
       Name: Map
       Topic: /cartographer/map
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -107,12 +107,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: false
+      Enabled: true
       Name: Map
       Topic: /sim_ex_coverage_node/sub_map
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.5
       Class: rviz/Map
       Color Scheme: map
@@ -136,7 +136,7 @@ Visualization Manager:
       Marker Topic: /sim_ex_coverage_node/full_path
       Name: Marker
       Namespaces:
-        {}
+        full_path: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -190,7 +190,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -0.010000022128224373
+      Angle: -1.5549989938735962
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -202,8 +202,8 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Scale: 117.14705657958984
       Target Frame: local_map
-      X: 0.9275136590003967
-      Y: 1.7218941450119019
+      X: 1.5607882738113403
+      Y: -0.6832532286643982
     Saved: ~
 Window Geometry:
   Displays:

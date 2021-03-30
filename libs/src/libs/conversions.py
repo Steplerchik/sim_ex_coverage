@@ -5,8 +5,7 @@ from math import ceil, atan2
 
 FREE = 0
 OCCUPIED = 100
-UNKNOWN = 50
-UNKNOWN_UPPER = 55
+UNKNOWN = 120
 
 
 def cvt_local2global(local_point: np.array, src_point: np.array):
@@ -66,7 +65,7 @@ def cvt_map_point2point(map_point: np.array, map: MapData) -> np.array:
     return cvt_local2global(point, map.origin)
 
 
-def resize_map(map: MapData, target_res: float) -> MapData:
+def resize_map(map: MapData, target_res: float, lethal_cost_threshold: int) -> MapData:
     resized_map = MapData()
     resized_map.res = target_res
     resized_map.h = ceil(float(map.h * map.res) / target_res)
@@ -79,25 +78,15 @@ def resize_map(map: MapData, target_res: float) -> MapData:
 
     for i in range(diff_w):
         map_data = np.vstack((map_data, map_data[-1, :][np.newaxis]))
-
     for j in range(diff_h):
         map_data = np.hstack((map_data, map_data[:, -1][np.newaxis].T))
 
-    # resized_map.w = int(map.w * map.res / target_res)
-    # resized_map.h = int(map.h * map.res / target_res)
-    # diff_h = int((map.h * map.res - resized_map.h * resized_map.res) / map.res)
-    # diff_w = int((map.w * map.res - resized_map.w * resized_map.res) / map.res)
-    # print("diff_h: ", diff_h)
-    # print("diff_w: ", diff_w)
-    # print("map.h:", map.h)
-    # print("map.data.shape:", map.data.shape)
-    # map_data = map.data[diff_w:, diff_h:]
-    # map_data = map.data
-
     resized_map.origin = map.origin
     resized_map.data = cv2.resize(map_data.astype(np.uint8), (resized_map.h, resized_map.w), interpolation=cv2.INTER_LINEAR)
-    resized_map.data[resized_map.data > UNKNOWN_UPPER] = OCCUPIED
-    resized_map.data[(resized_map.data > 0) * (resized_map.data <= UNKNOWN_UPPER)] = UNKNOWN
+    # resized_map.data = cv2.resize(map_data.astype(np.uint8), (resized_map.h, resized_map.w), interpolation=cv2.INTER_AREA)
+    resized_map.data[(resized_map.data < lethal_cost_threshold) * (resized_map.data >= FREE)] = FREE
+    resized_map.data[(resized_map.data >= lethal_cost_threshold) * (resized_map.data <= (OCCUPIED + UNKNOWN) / 2)] = OCCUPIED
+    resized_map.data[resized_map.data > (OCCUPIED + UNKNOWN) / 2] = UNKNOWN
     resized_map.frame_id = map.frame_id
     return resized_map
 

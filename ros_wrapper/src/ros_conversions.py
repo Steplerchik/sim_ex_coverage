@@ -6,7 +6,7 @@ import tf2_ros
 import numpy as np
 import rospy
 from libs.structures import MapData
-from libs.conversions import FREE, OCCUPIED, UNKNOWN, UNKNOWN_UPPER
+from libs.conversions import FREE, OCCUPIED, UNKNOWN
 
 def cvt_angle2quaternion(angle: np.array) -> Quaternion:
     quaternion = Quaternion()
@@ -78,7 +78,7 @@ def cvt_map2occupancy(map: MapData) -> OccupancyGrid:
     return map_msg
 
 
-def cvt_occupancy2map(map_msg: OccupancyGrid, lethal_cost_threshold: float) -> MapData:
+def cvt_occupancy2map(map_msg: OccupancyGrid, lethal_cost_threshold: int) -> MapData:
     map_data = np.array(map_msg.data).reshape(map_msg.info.height, map_msg.info.width).T
     map_data[(map_data < lethal_cost_threshold) * (map_data >= 0)] = FREE
     map_data[map_data >= lethal_cost_threshold] = OCCUPIED

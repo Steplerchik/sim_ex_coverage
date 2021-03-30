@@ -1,4 +1,4 @@
 base_frame: ump
 map_frame: map
 rate: 5.0
-coords: [0.25, 0.75, 0]
+coords: [0, 0, 0]

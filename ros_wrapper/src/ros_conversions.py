@@ -93,13 +93,13 @@ def cvt_occupancy2map(map_msg: OccupancyGrid, lethal_cost_threshold: int) -> Map
     return map
 
 
-def cvt_points2marker(name: str, frame_id: str, points: list, color=np.array([0, 0, 0]), scale=0.1) -> Marker:
+def cvt_points2marker(name: str, frame_id: str, points: list, color=np.array([0, 0, 0]), scale=0.1, type=Marker.LINE_STRIP) -> Marker:
     marker_msg = Marker()
     marker_msg.header.frame_id = frame_id
     marker_msg.header.stamp = rospy.Time.now()
     marker_msg.ns = name
     marker_msg.id = 0
-    marker_msg.type = Marker.LINE_STRIP
+    marker_msg.type = type
     marker_msg.action = 0
     marker_msg.scale.x = scale
     marker_msg.color.r = color[0]

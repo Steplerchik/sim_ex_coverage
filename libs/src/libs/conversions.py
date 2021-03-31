@@ -65,7 +65,7 @@ def cvt_map_point2point(map_point: np.array, map: MapData) -> np.array:
     return cvt_local2global(point, map.origin)
 
 
-def resize_map(map: MapData, target_res: float, lethal_cost_threshold: int) -> MapData:
+def resize_map(map: MapData, target_res: float) -> MapData:
     resized_map = MapData()
     resized_map.res = target_res
     resized_map.h = ceil(float(map.h * map.res) / target_res)
@@ -84,11 +84,30 @@ def resize_map(map: MapData, target_res: float, lethal_cost_threshold: int) -> M
     resized_map.origin = map.origin
     resized_map.data = cv2.resize(map_data.astype(np.uint8), (resized_map.h, resized_map.w), interpolation=cv2.INTER_LINEAR)
     # resized_map.data = cv2.resize(map_data.astype(np.uint8), (resized_map.h, resized_map.w), interpolation=cv2.INTER_AREA)
-    resized_map.data[(resized_map.data < lethal_cost_threshold) * (resized_map.data >= FREE)] = FREE
-    resized_map.data[(resized_map.data >= lethal_cost_threshold) * (resized_map.data <= (OCCUPIED + UNKNOWN) / 2)] = OCCUPIED
+    resized_map.data[(resized_map.data < (FREE + OCCUPIED) / 2) * (resized_map.data >= FREE)] = FREE
+    resized_map.data[(resized_map.data >= (FREE + OCCUPIED) / 2) * (resized_map.data <= (OCCUPIED + UNKNOWN) / 2)] = OCCUPIED
     resized_map.data[resized_map.data > (OCCUPIED + UNKNOWN) / 2] = UNKNOWN
     resized_map.frame_id = map.frame_id
     return resized_map
+
+def cvt_sub2mega(sub_map: MapData) -> MapData:
+    mega_map = MapData()
+    mega_map.res = sub_map.res * 2
+    mega_map.h = int(sub_map.h / 2) + sub_map.h % 2
+    mega_map.w = int(sub_map.w / 2) + sub_map.w % 2
+    mega_map.origin = sub_map.origin
+    mega_map.frame_id = sub_map.frame_id
+
+    map_data = sub_map.data
+    if sub_map.w % 2 != 0:
+        map_data = np.vstack((map_data, map_data[-1, :][np.newaxis]))
+    if sub_map.h % 2 != 0:
+        map_data = np.hstack((map_data, map_data[:, -1][np.newaxis].T))
+
+    temp = np.maximum(map_data[::2, ::2], map_data[1::2, 1::2])
+    temp = np.maximum(temp, map_data[::2, 1::2])
+    mega_map.data = np.maximum(temp, map_data[1::2, ::2])
+    return mega_map
 
 def cvt_direction2angle(begin:np.array, end:np.array) -> float:
     direction = end - begin

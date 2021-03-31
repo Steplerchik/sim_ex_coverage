@@ -1,7 +1,8 @@
 import numpy as np
+import cv2
 from libs.structures import MapData, STCell, STMap
 from libs.graph import Graph
-from libs.conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle
+from libs.conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle, cvt_sub2mega
 from libs.conversions import FREE, UNKNOWN, OCCUPIED
 
 
@@ -84,8 +85,9 @@ class SimExCoveragePlanner(object):
         return cell
 
     def update_st_map(self, map: MapData):
-        self._st_map.sub = resize_map(map, self._robot_size, lethal_cost_threshold=int((FREE + OCCUPIED) / 2))
-        self._st_map.mega = resize_map(self._st_map.sub, 2 * self._robot_size, lethal_cost_threshold=1)
+        self._st_map.sub = resize_map(map, self._robot_size)
+        self._st_map.mega = cvt_sub2mega(self._st_map.sub)
+        # self._st_map.mega = resize_map(self._st_map.sub, 2 * self._robot_size, interpolation=cv2.INTER_NEAREST)
 
     def get_next_cell(self, cell: STCell) -> STCell:
         sub_cells = [(1 + cell.mega) * 2 - 1,

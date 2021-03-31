@@ -91,7 +91,7 @@ class SimExCoverageNode(object):
         publish_map(st_map.sub, self.sub_map_publisher)
 
     def publish_st(self, st_points: list):
-        publish_marker("spanning_tree", self.map_frame, st_points, self.spanning_tree_publisher)
+        publish_marker("spanning_tree", self.map_frame, st_points, self.spanning_tree_publisher, type=Marker.LINE_LIST)
 
     def publish_path(self, exploration_path_points: list, full_path_points: list):
         publish_marker("full_path", self.map_frame, full_path_points, self.full_path_publisher,

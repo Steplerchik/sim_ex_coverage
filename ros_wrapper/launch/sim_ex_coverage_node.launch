@@ -1,6 +1,6 @@
 <launch>
     <arg name="simulate_tf"          default="false"/>
-    <arg name="robot_size"           default="0.5"/>
+    <arg name="robot_size"           default="0.25"/>
     <arg name="extend_map"           default="true"/>
     <arg name="map_topic"            default="/cartographer/map"/>
     <arg name="rviz"                 default="false"/>
@@ -16,7 +16,7 @@
         <rosparam file="$(find ros_wrapper)/config/costmap/static_map_params.yaml" command="load" ns="costmap/static_layer"/>
         <rosparam file="$(find ros_wrapper)/config/costmap/inflation_map_params.yaml" command="load" ns="costmap/inflation_layer"/>
         <param name="costmap/static_layer/map_topic" value="$(arg map_topic)"/>
-        <param name="costmap/inflation_radius" value="$(eval 0.5 * arg('robot_size'))"/>
+        <param name="costmap/inflation_radius" value="$(eval 1.5 * arg('robot_size'))"/>
         <remap from="/costmap_2d_node/costmap/costmap" to="/extended_map"/>
     </node>
 

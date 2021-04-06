@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from libs.structures import MapData, STCell, STMap
 from libs.graph import Graph
-from libs.conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle, cvt_sub2mega
+from libs.conversions import cvt_point2map_point, resize_map, cvt_map_point2point, cvt_direction2angle, cvt_sub2mega, cvt_map2map_to_resize, cvt_input2sub
 from libs.conversions import FREE, UNKNOWN, OCCUPIED
 
 
@@ -13,10 +13,13 @@ class SimExCoveragePlanner(object):
         self._start_cell = STCell()
         self._st = Graph()
         self._full_path_points = []
+        self._full_path_points_tuple = []
         self._exploration_path_points = []
         self._status_started = False
         self._status_running = False
         self._status_finished = False
+
+        self.previous_sub_map_origin = None
 
 
     def solve(self, robot_position: np.array, map: MapData):
@@ -45,18 +48,21 @@ class SimExCoveragePlanner(object):
         current_cell = cell
         self._exploration_path_points = [robot_position[:2], cvt_map_point2point(current_cell.sub, self._st_map.sub)]
         neighbours = []
-        while (len(self._exploration_path_points) < 5 and (current_cell.mega == cell.mega).all()) or \
-            (len(neighbours) == 0 and not (current_cell.sub == self._start_cell.sub).all()):
+        while (not ((current_cell.sub == self._start_cell.sub).all() and (tuple(self._start_cell.sub) in self._full_path_points_tuple))) and ((len(self._exploration_path_points) < 5 and (current_cell.mega == cell.mega).all()) or \
+            (len(neighbours) == 0 and not (current_cell.sub == self._start_cell.sub).all())):
             neighbours = self.get_neighbours(current_cell.mega, self._st_map.mega)
             neighbours = [x for x in neighbours if self._st_map.mega.data[x[0], x[1]] == UNKNOWN]
             current_cell = self.get_next_cell(current_cell)
             self._exploration_path_points.append(cvt_map_point2point(current_cell.sub, self._st_map.sub))
+
+        exploration_path_points_tuple = [tuple(x) for x in self._exploration_path_points]
 
         for i in range(len(self._exploration_path_points) - 1):
             self._exploration_path_points[i] = np.append(self._exploration_path_points[i],
                                                          cvt_direction2angle(self._exploration_path_points[i], self._exploration_path_points[i + 1]))
         self._exploration_path_points[-1] = np.append(self._exploration_path_points[-1], self._exploration_path_points[-2][2])
         self._full_path_points.extend(self._exploration_path_points)
+        self._full_path_points_tuple.extend(exploration_path_points_tuple)
         if (current_cell.sub == self._start_cell.sub).all():
             self._status_started = False
             self._status_running = False
@@ -85,8 +91,51 @@ class SimExCoveragePlanner(object):
         return cell
 
     def update_st_map(self, map: MapData):
-        self._st_map.sub = resize_map(map, self._robot_size)
+        self._st_map.sub = cvt_input2sub(map, self._robot_size, int(10 / self._robot_size), int(10 / self._robot_size), np.array([-5, -5, 0]))
         self._st_map.mega = cvt_sub2mega(self._st_map.sub)
+
+        # self._st_map.sub = resize_map(map_to_resize, self._robot_size)
+
+        # map_to_resize = cvt_map2map_to_resize(self._st_map.sub, self.previous_sub_map_origin, 2 * self._robot_size)
+        # if self.previous_sub_map_origin is not None:
+        #     shift_mega = self.previous_sub_map_origin - map_to_resize.origin
+        #     mega_res = 2 * self._robot_size
+        #     shift_mega_cells_x = int(shift_mega[0] / mega_res)
+        #     shift_mega_cells_y = int(shift_mega[1] / mega_res)
+        #     sub_res = self._robot_size
+        #     shift_sub_cells_x = int(shift_mega[0] / sub_res)
+        #     shift_sub_cells_y = int(shift_mega[1] / sub_res)
+        #
+        #     new_st_nodes = set()
+        #     for node in self._st.nodes:
+        #         new_node = (node[0] + shift_mega_cells_x, node[1] + shift_mega_cells_y)
+        #         # new_st_nodes.add(tuple(map(sum, zip(node, (shift_mega_cells_x, shift_mega_cells_y)))))
+        #         new_st_nodes.add(new_node)
+        #     self._st.nodes = new_st_nodes
+        #
+        #     new_st_edges = {}
+        #     for key in self._st.edges:
+        #         new_edge_list = []
+        #         for node in self._st.edges[key]:
+        #             new_node = (node[0] + shift_mega_cells_x, node[1] + shift_mega_cells_y)
+        #             new_edge_list.append(new_node)
+        #         new_key = (key[0] + shift_mega_cells_x, key[1] + shift_mega_cells_y)
+        #         new_st_edges[new_key] = new_edge_list
+        #     self._st.edges = new_st_edges
+        #
+        #         # self._st.edges[key][i] = tuple(map(sum, zip(self._st.edges[key][i], (shift_mega_cells_x, shift_mega_cells_y))))
+        #         # self._st.edges[key][i] = self._st.edges[key][i]
+        #
+        #     self._start_cell.mega += np.array([shift_mega_cells_x, shift_mega_cells_y])
+        #     self._start_cell.sub += np.array([shift_sub_cells_x, shift_sub_cells_y])
+        #
+        # self.previous_sub_map_origin = map_to_resize.origin
+        # self._st_map.mega = cvt_sub2mega(map_to_resize)
+
+
+
+
+
         # self._st_map.mega = resize_map(self._st_map.sub, 2 * self._robot_size, interpolation=cv2.INTER_NEAREST)
 
     def get_next_cell(self, cell: STCell) -> STCell:

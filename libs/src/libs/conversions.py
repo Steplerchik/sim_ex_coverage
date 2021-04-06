@@ -90,6 +90,40 @@ def resize_map(map: MapData, target_res: float) -> MapData:
     resized_map.frame_id = map.frame_id
     return resized_map
 
+
+def cvt_input2sub(map: MapData, target_res: float, target_h: int, target_w: int, target_origin: np.array) -> MapData:
+    sub_map = MapData()
+    sub_map.res = target_res
+    sub_map.h = target_h
+    sub_map.w = target_w
+    sub_map.origin = target_origin
+
+    map_begin_w = int((map.origin[0] - sub_map.origin[0]) / map.res)
+    map_begin_h = int((map.origin[1] - sub_map.origin[1]) / map.res)
+
+    map_end_w = int(float(sub_map.w) * sub_map.res / map.res) - map.w - map_begin_w
+    map_end_h = int(float(sub_map.h) * sub_map.res / map.res) - map.h - map_begin_h
+
+    map_data = map.data
+
+    for i in range(map_begin_w):
+        map_data = np.vstack((map_data[0, :][np.newaxis], map_data))
+    for j in range(map_begin_h):
+        map_data = np.hstack((map_data[:, 0][np.newaxis].T, map_data))
+
+    for i in range(map_end_w):
+        map_data = np.vstack((map_data, map_data[-1, :][np.newaxis]))
+    for j in range(map_end_h):
+        map_data = np.hstack((map_data, map_data[:, -1][np.newaxis].T))
+
+    sub_map.data = cv2.resize(map_data.astype(np.uint8), (sub_map.h, sub_map.w), interpolation=cv2.INTER_LINEAR)
+    sub_map.data[(sub_map.data < (FREE + OCCUPIED) / 2) * (sub_map.data >= FREE)] = FREE
+    sub_map.data[(sub_map.data >= (FREE + OCCUPIED) / 2) * (sub_map.data <= (OCCUPIED + UNKNOWN) / 2)] = OCCUPIED
+    sub_map.data[sub_map.data > (OCCUPIED + UNKNOWN) / 2] = UNKNOWN
+    sub_map.frame_id = map.frame_id
+    return sub_map
+
+
 def cvt_sub2mega(sub_map: MapData) -> MapData:
     mega_map = MapData()
     mega_map.res = sub_map.res * 2
@@ -109,6 +143,23 @@ def cvt_sub2mega(sub_map: MapData) -> MapData:
     mega_map.data = np.maximum(temp, map_data[1::2, ::2])
     return mega_map
 
+
 def cvt_direction2angle(begin:np.array, end:np.array) -> float:
     direction = end - begin
     return atan2(direction[1], direction[0])
+
+
+def cvt_map2map_to_resize(map: MapData, previous_map_origin: np.array, target_res: float) -> MapData:
+    map_to_resize = map
+    if previous_map_origin is not None:
+        origin_shift = previous_map_origin - map.origin
+        remove_rows = int(origin_shift[0] / map.res) % int(target_res / map.res)
+        remove_columns = int(origin_shift[1] / map.res) % int(target_res / map.res)
+        map_to_resize.data = map_to_resize.data[remove_rows:, :]
+        map_to_resize.data = map_to_resize.data[:, remove_columns:]
+        map_to_resize.w = map_to_resize.data.shape[0]
+        map_to_resize.h = map_to_resize.data.shape[1]
+        map_to_resize.origin = map.origin + np.array([remove_rows * map.res,
+                                                      remove_columns * map.res,
+                                                      0])
+    return map_to_resize

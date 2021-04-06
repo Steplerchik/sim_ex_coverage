@@ -8,6 +8,7 @@ from nav_msgs.msg import Path, OccupancyGrid
 from geometry_msgs.msg import PointStamped, PoseStamped
 from visualization_msgs.msg import Marker
 from libs.structures import MapData, STMap
+from libs.conversions import cvt_map2map_to_resize
 from libs.sim_ex_coverage_planner import SimExCoveragePlanner
 from ros_conversions import cvt_ros_pose2point, get_transform, cvt_map2occupancy, cvt_occupancy2map
 from ros_functions import publish_map, publish_marker, publish_path
@@ -23,6 +24,8 @@ class SimExCoverageNode(object):
         self.map_frame = rospy.get_param("~map_frame", "map")
         self.lethal_cost_threshold = rospy.get_param("~lethal_cost_threshold", 60)
         robot_size = rospy.get_param("~robot_size", 1.0)
+        self._robot_size = robot_size
+        self.previous_map_origin = None
 
         self.mutex = threading.Lock()
 
@@ -63,6 +66,7 @@ class SimExCoverageNode(object):
         self.mutex.release()
 
     def explore_callback(self, event):
+        rospy.sleep(2.0)
         self.mutex.acquire()
         rospy.loginfo("Start exploring..")
         robot_position = get_transform(self.tf_buffer, self.base_frame, self.map_frame, rospy.Time())
@@ -79,6 +83,8 @@ class SimExCoverageNode(object):
 
     def map_callback(self, data: OccupancyGrid):
         self.map = cvt_occupancy2map(data, self.lethal_cost_threshold)
+        # self.map = cvt_map2map_to_resize(self.map, self.previous_map_origin, self._robot_size)
+        # self.previous_map_origin = self.map.origin
 
     def publish_all(self):
         self.publish_st_map(self.planner.st_map)

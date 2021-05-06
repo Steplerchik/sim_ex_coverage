@@ -91,7 +91,8 @@ class SimExCoveragePlanner(object):
         return cell
 
     def update_st_map(self, map: MapData):
-        self._st_map.sub = cvt_input2sub(map, self._robot_size, int(10 / self._robot_size), int(10 / self._robot_size), np.array([-5, -5, 0]))
+        # self._st_map.sub = cvt_input2sub(map, self._robot_size, int(10 / self._robot_size), int(10 / self._robot_size), np.array([-5, -5, 0]))
+        self._st_map.sub = cvt_input2sub(map, self._robot_size, int(20 / self._robot_size), int(10 / self._robot_size), np.array([-4.0, -14.5, 0]))
         self._st_map.mega = cvt_sub2mega(self._st_map.sub)
 
         # self._st_map.sub = resize_map(map_to_resize, self._robot_size)
